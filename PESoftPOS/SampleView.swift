@@ -12,7 +12,7 @@ struct SampleView: View {
     @State private var transactionAmount: String = ""
     @State private var resultMessage: String = ""
     @State private var errorMessage: String = ""
-    @State private var isTransactionHappening = false
+    @State private var inProgress = false
     
     var body: some View {
         VStack(spacing: 10) {
@@ -31,11 +31,12 @@ struct SampleView: View {
                 self.startTransaction()
             }
             .buttonStyle(.borderedProminent)
-            .disabled(self.transactionAmount.isEmpty || self.isTransactionHappening)
+            .disabled(self.transactionAmount.isEmpty || self.inProgress)
             
             Text(resultMessage)
                 .foregroundColor(.blue)
                 .padding(.top, 10)
+                .lineLimit(6)
             
             Text(errorMessage)
                 .foregroundStyle(.red)
@@ -50,7 +51,7 @@ struct SampleView: View {
     
     /// Run transaction method
     private func startTransaction() {
-        self.isTransactionHappening = true
+        self.inProgress = true
         
         Task {
             do {
@@ -59,17 +60,29 @@ struct SampleView: View {
                     let activationCode = try await PETapToPayShim.getActivationCode()
                     let activationCodeMessage = "Activation code: \(activationCode ?? "NO CODE")"
                     self.resultMessage = activationCodeMessage
+                    self.inProgress = false
                     print(activationCodeMessage)
                     return
                 }
                 
-                try await PETapToPayShim.initializeDevice(mode: .device, autoConnect: true)
+                // Step 1 - initialize SDK
+                try await PETapToPayShim.initializeDevice()
                 
+                // Step 2 - Prepare and run transaction
                 if let decimalAmount = Decimal(string: transactionAmount) {
-                    let req = PEPaymentRequest(transactionAmount: decimalAmount, currencyCode: "USD")
+                    let req = PEPaymentRequest(transactionAmount: decimalAmount,
+                                               transactionData: PEJSON([
+                                                    "transactionMonitoringBypass": true, // To bypass monitoring rules
+                                                    "data": [
+                                                       "sales_tax": 1.25, // Level 2 data example
+                                                       "order_number": "XXX12345", // Level 2 data example
+                                                       "gateway_id": "cea013fd-ac46-4e47-a2dc-a1bc3d89bf0c" // Route to specific gateway - Change it to valid gateway ID
+                                                    ]
+                                                ]),
+                                               currencyCode: "USD", )
                     
                     let transactionResult = try await PETapToPayShim.startTransaction(request: req)
-                    let transactionSucceededMessage = "Transaction complete: \(transactionResult.isSuccess) - transactionID: \(String(describing: transactionResult.transactionId)) - responseCode: \(String(describing: transactionResult.responseCode)) - responseMessage: \(String(describing: transactionResult.responseMessage))"
+                    let transactionSucceededMessage = "Transaction completed: \(transactionResult.isSuccess)\nTransactionID: \(transactionResult.transactionId ?? "")\nresponseMessage: \(transactionResult.responseMessage ?? "")"
                     
                     self.resultMessage = transactionSucceededMessage
                     print(transactionSucceededMessage)
@@ -79,16 +92,16 @@ struct SampleView: View {
                 
                 print("✅ Transaction succeeded")
                 
-                self.isTransactionHappening = false
+                self.inProgress = false
             } catch PETapError.transactionFailed(let transactionResult) {
                 self.errorMessage = transactionResult.error?.localizedDescription ?? "Unknown error"
-                self.isTransactionHappening = false
+                self.inProgress = false
             }
             catch {
                 await PETapToPayShim.deinitialize()
                 print("❌ PayEngine flow failed:", error)
                 self.errorMessage = error.localizedDescription
-                self.isTransactionHappening = false
+                self.inProgress = false
             }
         }
     }
