@@ -1,0 +1,15 @@
+{
+  "originHash" : "bb5c655dfbbfdbac6c2bbd6616b0a6e21112bf0bd0a47fa09ecbe07f870654be",
+  "pins" : [
+    {
+      "identity" : "payengine-softpos-swift-package",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/payengine/payengine-softpos-swift-package.git",
+      "state" : {
+        "revision" : "81590e1c9abb7044e6c6642580ad4e8b9093d193",
+        "version" : "1.1.0"
+      }
+    }
+  ],
+  "version" : 3
+}
