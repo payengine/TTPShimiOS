@@ -12,6 +12,7 @@ struct SampleView: View {
     @State private var transactionAmount: String = ""
     @State private var resultMessage: String = ""
     @State private var errorMessage: String = ""
+    @State private var isTransactionHappening = false
     
     var body: some View {
         VStack(spacing: 10) {
@@ -30,7 +31,7 @@ struct SampleView: View {
                 self.startTransaction()
             }
             .buttonStyle(.borderedProminent)
-            .disabled(transactionAmount.isEmpty)
+            .disabled(self.transactionAmount.isEmpty || self.isTransactionHappening)
             
             Text(resultMessage)
                 .foregroundColor(.blue)
@@ -49,6 +50,8 @@ struct SampleView: View {
     
     /// Run transaction method
     private func startTransaction() {
+        self.isTransactionHappening = true
+        
         Task {
             do {
                 guard try await PETapToPayShim.isActivated() else {
@@ -76,13 +79,16 @@ struct SampleView: View {
                 
                 print("✅ Transaction succeeded")
                 
+                self.isTransactionHappening = false
             } catch PETapError.transactionFailed(let transactionResult) {
                 self.errorMessage = transactionResult.error?.localizedDescription ?? "Unknown error"
+                self.isTransactionHappening = false
             }
             catch {
                 await PETapToPayShim.deinitialize()
                 print("❌ PayEngine flow failed:", error)
                 self.errorMessage = error.localizedDescription
+                self.isTransactionHappening = false
             }
         }
     }
