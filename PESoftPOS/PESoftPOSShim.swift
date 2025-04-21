@@ -31,11 +31,11 @@ class PETapToPayShim {
     fileprivate static var initializationDelegate: SDKInitializationDelegate?
     fileprivate static var deviceDelegate: DeviceDelegate?
     
-    static let peSDK = PEPaymentDevice.shared
-    
-    init() {
+    static let peSDK: PEPaymentDevice = {
+        let peSDK = PEPaymentDevice.shared
         PEPaymentDevice.environment = PEEnvironment.Sandbox
-    }
+        return peSDK
+    }()
     
     
     static func getActivationCode() async throws -> String? {
