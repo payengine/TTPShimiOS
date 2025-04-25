@@ -88,6 +88,10 @@ class PETapToPayShim {
             peSDK.deinitialize()
         }
     }
+    
+    static func registerCustomization(_ customization: PECustomization) {
+        self.peSDK.registerCustomization(customization)
+    }
 }
 
 

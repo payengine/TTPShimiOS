@@ -47,6 +47,21 @@ struct SampleView: View {
         .padding()
         .navigationTitle("Shim Test")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            PETapToPayShim.registerCustomization(PECustomization { error in
+//                You can also add switch on the error to return specialized message for each error code.
+//                switch error {
+//                case .CardReadError(code: let code, message: let message):
+//                    
+//                case .ProcessingError(code: let code, message: let message):
+//
+//                @unknown default:
+//
+//                }
+                
+                return "\(error.message) (Code: \(error.code))"
+            })
+        }
     }
     
     /// Run transaction method
@@ -79,7 +94,7 @@ struct SampleView: View {
                                                        "gateway_id": "cea013fd-ac46-4e47-a2dc-a1bc3d89bf0c" // Route to specific gateway - Change it to valid gateway ID
                                                     ]
                                                 ]),
-                                               currencyCode: "USD", )
+                                               currencyCode: "USD")
                     
                     let transactionResult = try await PETapToPayShim.startTransaction(request: req)
                     let transactionSucceededMessage = "Transaction completed: \(transactionResult.isSuccess)\nTransactionID: \(transactionResult.transactionId ?? "")\nresponseMessage: \(transactionResult.responseMessage ?? "")"
@@ -94,7 +109,31 @@ struct SampleView: View {
                 
                 self.inProgress = false
             } catch PETapError.transactionFailed(let transactionResult) {
+                await PETapToPayShim.deinitialize()
+                
                 self.errorMessage = transactionResult.error?.localizedDescription ?? "Unknown error"
+                self.inProgress = false
+            }
+            catch let error as PEError {
+                let errorMessage: String
+                switch error {
+                case .CardReadError(code: let code, message: _):
+                    switch code {
+                    case .CODE_PAYMENT_CARD_READER_ERROR:
+                        errorMessage = "Error during card reading"
+                    default:
+                        errorMessage = "Unknown error during card reading"
+                    }
+                case .ProcessingError(code: let code, message: let message):
+                    print(code)
+                    errorMessage = "Error while proccessing: \(message)"
+                @unknown default:
+                    errorMessage = "Unknown error during card reading"
+                }
+                
+                await PETapToPayShim.deinitialize()
+                
+                self.errorMessage = errorMessage
                 self.inProgress = false
             }
             catch {
