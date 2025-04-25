@@ -111,7 +111,7 @@ struct SampleView: View {
             } catch PETapError.transactionFailed(let transactionResult) {
                 await PETapToPayShim.deinitialize()
                 
-                self.errorMessage = transactionResult.error?.localizedDescription ?? "Unknown error"
+                self.errorMessage = transactionResult.paymentError?.localizedDescription ?? "Unknown error"
                 self.inProgress = false
             }
             catch let error as PEError {
@@ -127,8 +127,9 @@ struct SampleView: View {
                 case .ProcessingError(code: let code, message: let message):
                     print(code)
                     errorMessage = "Error while proccessing: \(message)"
-                @unknown default:
-                    errorMessage = "Unknown error during card reading"
+                default:
+                    log("Error code: \(error.code)")
+                    errorMessage = "Error while proccessing: \(error.localizedDescription)"
                 }
                 
                 await PETapToPayShim.deinitialize()
