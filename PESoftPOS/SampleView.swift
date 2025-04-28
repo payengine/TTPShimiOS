@@ -74,12 +74,12 @@ struct SampleView: View {
                                                transactionData: PEJSON([
                                                     "transactionMonitoringBypass": true, // To bypass monitoring rules
                                                     "data": [
-                                                       "sales_tax": 1.25, // Level 2 data example
-                                                       "order_number": "XXX12345", // Level 2 data example
-                                                       "gateway_id": "cea013fd-ac46-4e47-a2dc-a1bc3d89bf0c" // Route to specific gateway - Change it to valid gateway ID
+                                                        "sales_tax": 0.1, // Level 2 data example
+                                                        "order_number": "XXX12345", // Level 2 data example
+//                                                       "gateway_id": "cea013fd-ac46-4e47-a2dc-a1bc3d89bf0c" // Route to specific gateway - Change it to valid gateway ID
                                                     ]
                                                 ]),
-                                               currencyCode: "USD", )
+                                               currencyCode: "USD")
                     
                     let transactionResult = try await PETapToPayShim.startTransaction(request: req)
                     let transactionSucceededMessage = "Transaction completed: \(transactionResult.isSuccess)\nTransactionID: \(transactionResult.transactionId ?? "")\nresponseMessage: \(transactionResult.responseMessage ?? "")"

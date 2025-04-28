@@ -23,6 +23,11 @@ enum PETapError: Error {
     case activationRequired(String)
 }
 
+class STEnvironment: IPEEnvironment {
+    var socketHostname: String = "ws.payengine-st.com"
+    var apiHostname: String = "gateway.payengine-st.com"
+}
+
 
 // MARK: -
 /// Async entrypoint to initialize & (optionally) auto‑connect
@@ -33,7 +38,7 @@ class PETapToPayShim {
     
     static let peSDK: PEPaymentDevice = {
         let peSDK = PEPaymentDevice.shared
-        PEPaymentDevice.environment = PEEnvironment.Sandbox
+        PEPaymentDevice.environment = STEnvironment()
         return peSDK
     }()
     
