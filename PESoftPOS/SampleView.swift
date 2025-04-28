@@ -79,7 +79,7 @@ struct SampleView: View {
                                                        "gateway_id": "cea013fd-ac46-4e47-a2dc-a1bc3d89bf0c" // Route to specific gateway - Change it to valid gateway ID
                                                     ]
                                                 ]),
-                                               currencyCode: "USD", )
+                                               currencyCode: "USD")
                     
                     let transactionResult = try await PETapToPayShim.startTransaction(request: req)
                     let transactionSucceededMessage = "Transaction completed: \(transactionResult.isSuccess)\nTransactionID: \(transactionResult.transactionId ?? "")\nresponseMessage: \(transactionResult.responseMessage ?? "")"
