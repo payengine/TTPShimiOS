@@ -18,7 +18,7 @@ func printlog(_ message: String){
 enum PETapError: Error {
     case initializationFailed(Error)
     case connectionFailed(Error)
-    case transactionFailed(PEPaymentResult)
+    case transactionFailed(PEPaymentResult, String?)
     case noAvailableDevice
     case activationRequired(String)
 }
@@ -178,6 +178,7 @@ private class SDKInitializationDelegate: PEInitializationDelegate {
 
 // MARK: - Device Delegate
 class DeviceDelegate: PEDeviceDelegate {
+    var currentIdempotencyKey: String? = nil
     var cont: CheckedContinuation<PEDevice, Error>? = nil
     var txnContinue: CheckedContinuation<PEPaymentResult, Error>? = nil
     
@@ -210,6 +211,7 @@ class DeviceDelegate: PEDeviceDelegate {
     func didStartAuthorization(_ request: PEPaymentRequest) {}
     func didStartTransaction(_ request: PEPaymentRequest) {
         printlog("I am here in didStartTransaction")
+        currentIdempotencyKey = request.idempotentKey
     }
     func onActivationProgress(device: PEDevice, completed: Int) {
         printlog("I am here in onActivationProgress")
@@ -225,7 +227,7 @@ class DeviceDelegate: PEDeviceDelegate {
     
     func onTransactionFailed(transaction: PEPaymentResult) {
         if let txnContinue = self.txnContinue{
-            txnContinue.resume(throwing: PETapError.transactionFailed(transaction))
+            txnContinue.resume(throwing: PETapError.transactionFailed(transaction, currentIdempotencyKey))
         }
         self.txnContinue = nil
     }

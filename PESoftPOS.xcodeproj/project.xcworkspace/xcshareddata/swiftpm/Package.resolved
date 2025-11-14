@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/payengine/payengine-softpos-swift-package.git",
       "state" : {
-        "revision" : "a6b02fec459f31009471ae39294d20287de338ed",
-        "version" : "1.1.4"
+        "revision" : "653717ccf7a2d8d16ed5fc41c6e5a6a5b7ba929c",
+        "version" : "0.0.202511141000"
       }
     }
   ],
