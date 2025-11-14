@@ -79,7 +79,7 @@ struct SampleView: View {
                                                     "data": [
                                                        "sales_tax": 1.25, // Level 2 data example
                                                        "order_number": "XXX12345", // Level 2 data example
-                                                       "gateway_id": "cea013fd-ac46-4e47-a2dc-a1bc3d89bf0c" // Route to specific gateway - Change it to valid gateway ID
+//                                                       "gateway_id": "cea013fd-ac46-4e47-a2dc-a1bc3d89bf0c" // Route to specific gateway - Change it to valid gateway ID
                                                     ]
                                                 ]),
                                                currencyCode: "USD")
@@ -88,21 +88,28 @@ struct SampleView: View {
                     let transactionSucceededMessage = "Transaction completed: \(transactionResult.isSuccess)\nTransactionID: \(transactionResult.transactionId ?? "")\nresponseMessage: \(transactionResult.responseMessage ?? "")"
                     
                     self.resultMessage = transactionSucceededMessage
-                    print(transactionSucceededMessage)
+                    debugPrint(transactionSucceededMessage)
                 }
                 
                 await PETapToPayShim.deinitialize()
                 
-                print("✅ Transaction succeeded")
+                debugPrint("✅ Transaction succeeded")
                 
                 self.inProgress = false
-            } catch PETapError.transactionFailed(let transactionResult) {
-                self.errorMessage = transactionResult.error?.localizedDescription ?? "Unknown error"
+            } catch PETapError.transactionFailed(let transactionResult, let currentIdempotencyKey) {
+                var errorMessage = transactionResult.error?.localizedDescription ?? "Unknown error"
+                if (transactionResult.isInconclusive) {
+                    errorMessage += "\n\nUnexpected interruption during your transaction. Please use this idempotency key to retrieve actual transaction status via API: \(currentIdempotencyKey ?? "")"
+                    debugPrint("Idempotency Key: \(currentIdempotencyKey ?? "")")
+                }
+                self.errorMessage = errorMessage
                 self.inProgress = false
+                
+                
             }
             catch {
                 await PETapToPayShim.deinitialize()
-                print("❌ PayEngine flow failed:", error)
+                debugPrint("❌ PayEngine flow failed:", error)
                 self.errorMessage = error.localizedDescription
                 self.inProgress = false
             }
