@@ -352,7 +352,7 @@
 			repositoryURL = "https://github.com/payengine/payengine-softpos-swift-package.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.0.202511141000;
+				version = 0.0.202511141636;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
