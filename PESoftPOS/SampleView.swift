@@ -68,6 +68,9 @@ struct SampleView: View {
                 // Step 1 - initialize SDK
                 try await PETapToPayShim.initializeDevice()
                 
+                let terminalInfo = PETapToPayShim.terminalInfo
+                debugPrint("Merchant ID: \(String(describing: terminalInfo?.merchantId)) - \(String(describing: terminalInfo?.merchantName))")
+                
                 // Step 2 - Prepare and run transaction
                 if let decimalAmount = Decimal(string: transactionAmount) {
                     let req = PEPaymentRequest(transactionAmount: decimalAmount,

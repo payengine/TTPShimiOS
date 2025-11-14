@@ -31,6 +31,8 @@ class PETapToPayShim {
     fileprivate static var initializationDelegate: SDKInitializationDelegate?
     fileprivate static var deviceDelegate: DeviceDelegate?
     
+    static var terminalInfo: TerminalInfo? = nil
+    
     static let peSDK: PEPaymentDevice = {
         let peSDK = PEPaymentDevice.shared
         PEPaymentDevice.environment = PEEnvironment.Sandbox
@@ -162,7 +164,9 @@ private class SDKInitializationDelegate: PEInitializationDelegate {
         activationCodeContinuation = nil
         
     }
-    func onActivationStarting(terminalInfo: TerminalInfo) {}
+    func onActivationStarting(terminalInfo: TerminalInfo) {
+        PETapToPayShim.terminalInfo = terminalInfo
+    }
     func onEducationScreenDismissed() {}
     
     func onDeinitialized() {
